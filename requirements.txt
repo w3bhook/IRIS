@@ -1,0 +1,4 @@
+wolframalpha
+speechrecognition
+pyaudio
+pyttsx3
