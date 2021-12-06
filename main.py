@@ -5,24 +5,30 @@ import speech_recognition as sr
 import pyttsx3 as tts
 import subprocess as sp
 
+from gpiozero import LED as led
+
 engine = tts.init()
-listener = sr.Recognizer()
+r = sr.Recognizer()
 wra = wra.Client("Y9G92A-94TV756H3T")
 acronym = 'Intelligent but Retarded Information Supply'
 keyword = 'iris'
+blue = led(17)
 
-print(sr.Microphone.list_microphone_names())
-t.sleep(10)
+snooze = rnd.choice([
+	"IRIS Shutting Down",
+	"Going to sleep",
+	"Skipping the alarm"
+])
 
-songs = [
+songs = rnd.choice([
 	'My sprinkler goes like thisstststststststststststststststststststststststst and comes back like titttttttttttttttttttttttttttttttttttttte.',
 	'ooluu lulu ooluuu luuluu ooluu lulu ooluuu luuluu ooluu lulu ooluuu luuluu ooluu lulu ooluuu luuluu ooluu lulu ooluuu luuluu ooluu lulu ooluuu luuluu ooluu lulu ooluuu luuluu',
 	'The ting goes skrrrahh, pap pap kah-kah-kah Skidiki-pap-pap, and a puu-puu-poudrrr-boom Skiya, du-du-ku-ku-doom doom Poom poom, you dun now.',
 	'a b c d e f g h i j k l m n o p q r s t u v w x y and zee',
 	'a, b, c, d, e f g, h, i, j, k, l m n o p, q, r, s, t, u, v, w, x, y and zee'
-]
+])
 
-quotes = [
+quotes = rnd.choice([
 	'It’s easy to love your partner, but sometimes the hardest lesson to remember is to love your enemy.',
 	'The art of war is to defeat your enemies without fighting with them.',
 	'The best sword will rust when putting in saltwater.',
@@ -38,7 +44,7 @@ quotes = [
 	'Create a scenario in such a way that the enemy will move backwards.',
 	'Move as entirely as the wind is, and then become wood. Attack in a way as fire, but become a strong as the mountain is.',
 	'If you very far from your enemies, then you should show your enemies that you are very close to them.'
-]
+])
 
 class iris():
 
@@ -50,41 +56,82 @@ class iris():
 	def Stop(restart):
 		if restart == True:
 		    command = "/usr/bin/sudo /sbin/shutdown -c now"
-		    process = sp.Popen(command.split(), stdout=sp.PIPE)
+		    process = sp.Popen(command, stdout=sp.PIPE)
 		    output = process.communicate()[0]
 		elif restart == False:
 		    command = "/usr/bin/sudo /sbin/shutdown -h now"
-		    process = sp.Popen(command.split(), stdout=sp.PIPE)
+		    process = sp.Popen(command, stdout=sp.PIPE)
 		    output = process.communicate()[0]
 
 	def GatherInfo(talk):
-		if 'your name' in talk:
-			engine.say("My name is IRIS. What's yours?")
-			engine.runAndWait()
-		elif 'sing' in talk:
-			rnd_song = rnd.choice(songs)
-			engine.say(rnd_song)
-			engine.runAndWait()
-		else:
-			res = client.query(talk)
-			final = next(res.results).text
-			iris.Speak(final)
+		res = client.query(talk)
+		final = next(res.results).text
+		iris.Speak(final)
 
 	def Listen():
 		while True:
-			with sr.Microphone(device_index=4) as source:
-				audio = sr.listen()
+			with sr.Microphone() as source:
+				audio = r.listen(source)
+
+			if listen_name:
+				name = r.recognize_google(audio)
+				name = name.lower()
+				listen_name = False
+
 			if "iris" in audio.lower():
 				try:
-					text = sr.recognize_google(audio)
+					text = r.recognize_google(audio)
 					text = text.lower()
-					iris.GatherInfo(text.replace("iris", ""))
+					text = tedt.replace("iris", "")
+
+					if "light" in text and "on" in text:
+						if not blue:
+							blue.on()
+
+						blue = True
+						engine.say(affirm)
+						engine.runAndWait()
+
+					elif "light" in text and "off" in text:
+						if blue:
+							blue.off()
+						blue = False
+						engine.say(affirm)
+						engine.runAndWait()
+
+					elif "shut" in text or "bye" in text:
+						engine.say(snooze)
+						engine.runAndWait()
+						iris.Stop(False)
+
+					elif "restart" in text:
+						engine.say(snooze)
+						engine.runAndWait()
+						iris.Stop(True)
+
+					elif "joke" in text or "jokes" in text:
+						engine.say(jokes)
+						engine.runAndWait()
+
+					elif "quote" in text or "motivation" in text or "inspir" in text:
+						engine.say(quotes)
+						engine.runAndWait()
+
+					elif "sing" in text or "song" in text:
+						engine.say(songs)
+						engine.runAndWait()
+
+					elif "what" in text and "name" in text and "your" in text:
+						engine.say("My name is IRIS, what's yours?")
+						engine.runAndWait()
+						listen_name = True
+
+					else:
+						iris.GatherInfo(text)
 				except:
 					engine.say("Oops. Something went wrong. Say something again.")
 					engine.runAndWait()
 					iris.Listen()
-			else:
-				pass
 
 	def Speak(speech):
 		engine.say(speech)
