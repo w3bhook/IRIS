@@ -5,7 +5,8 @@ import speech_recognition as sr
 import pyttsx3 as tts
 import subprocess as sp
 
-from gpiozero import LED as led
+#from gpiozero import LED as led
+import RPi.GPIO as GPIO
 
 engine = tts.init()
 r = sr.Recognizer()
@@ -25,7 +26,8 @@ songs = rnd.choice([
 	'ooluu lulu ooluuu luuluu ooluu lulu ooluuu luuluu ooluu lulu ooluuu luuluu ooluu lulu ooluuu luuluu ooluu lulu ooluuu luuluu ooluu lulu ooluuu luuluu ooluu lulu ooluuu luuluu',
 	'The ting goes skrrrahh, pap pap kah-kah-kah Skidiki-pap-pap, and a puu-puu-poudrrr-boom Skiya, du-du-ku-ku-doom doom Poom poom, you dun now.',
 	'a b c d e f g h i j k l m n o p q r s t u v w x y and zee',
-	'a, b, c, d, e f g, h, i, j, k, l m n o p, q, r, s, t, u, v, w, x, y and zee'
+	'a, b, c, d, e f g, h, i, j, k, l m n o p, q, r, s, t, u, v, w, x, y and zee',
+	'nigger niga nigge nigo nig nig nigerino nigerian niga nig nigga nigger nigger niga nige'
 ])
 
 quotes = rnd.choice([
@@ -68,6 +70,11 @@ class iris():
 		final = next(res.results).text
 		iris.Speak(final)
 
+	def Speak(speech):
+		engine.say(speech)
+		engine.runAndWait()
+		iris.Listen()
+
 	def Listen():
 		while True:
 			with sr.Microphone() as source:
@@ -89,54 +96,40 @@ class iris():
 							blue.on()
 
 						blue = True
-						engine.say(affirm)
-						engine.runAndWait()
+						iris.Speak(affirm)
 
 					elif "light" in text and "off" in text:
 						if blue:
 							blue.off()
 						blue = False
-						engine.say(affirm)
-						engine.runAndWait()
+						iris.Speak(affirm)
 
 					elif "shut" in text or "bye" in text:
-						engine.say(snooze)
-						engine.runAndWait()
+						iris.Speak(snooze)
 						iris.Stop(False)
 
 					elif "restart" in text:
-						engine.say(snooze)
-						engine.runAndWait()
+						iris.Speak(snooze)
 						iris.Stop(True)
 
 					elif "joke" in text or "jokes" in text:
-						engine.say(jokes)
-						engine.runAndWait()
+						iris.Speak(jokes)
 
 					elif "quote" in text or "motivation" in text or "inspir" in text:
-						engine.say(quotes)
-						engine.runAndWait()
+						iris.Speak(quotes)
 
 					elif "sing" in text or "song" in text:
-						engine.say(songs)
-						engine.runAndWait()
+						iris.Speak(songs)
 
 					elif "what" in text and "name" in text and "your" in text:
-						engine.say("My name is IRIS, what's yours?")
-						engine.runAndWait()
+						iris.Speak("My name is IRIS, what's yours?")
 						listen_name = True
 
 					else:
 						iris.GatherInfo(text)
 				except:
-					engine.say("Oops. Something went wrong. Say something again.")
-					engine.runAndWait()
+					iris.Speak("Oops. Something went wrong. Say something again.")
 					iris.Listen()
-
-	def Speak(speech):
-		engine.say(speech)
-		engine.runAndWait()
-		iris.Listen()
 
 if __name__ == '__main__':
 	iris.Start()
